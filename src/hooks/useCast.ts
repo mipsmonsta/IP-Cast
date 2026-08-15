@@ -91,6 +91,7 @@ export function useCast() {
     // Delete the previous temp file before creating a new one
     if (prevTempFileRef.current) {
       deleteAsync(prevTempFileRef.current, { idempotent: true }).catch(() => {});
+      prevTempFileRef.current = null;
     }
 
     // Copy asset from photo library to a temp file so the HTTP server
@@ -106,17 +107,25 @@ export function useCast() {
     prevTempFileRef.current = localPath;
     setTempFilePath(localPath);
 
-    const serverUrl = await startServer({
-      port,
-      filePath: localPath,
-      contentType,
-    });
+    try {
+      const serverUrl = await startServer({
+        port,
+        filePath: localPath,
+        contentType,
+      });
 
-    setLocalServerUrl(serverUrl);
+      setLocalServerUrl(serverUrl);
 
-    // Append cache-buster so the Cast device fetches fresh content each time
-    const cacheBustUrl = serverUrl.replace(/\/$/, '') + `?t=${Date.now()}`;
-    await loadMedia(client, cacheBustUrl, contentType, selectedMedia.filename);
+      // Append cache-buster so the Cast device fetches fresh content each time
+      const cacheBustUrl = serverUrl.replace(/\/$/, '') + `?t=${Date.now()}`;
+      await loadMedia(client, cacheBustUrl, contentType, selectedMedia.filename);
+    } catch (error) {
+      // Clean up temp file on failure
+      deleteAsync(localPath, { idempotent: true }).catch(() => {});
+      prevTempFileRef.current = null;
+      setTempFilePath(null);
+      throw error;
+    }
   }, [selectedMedia, client, setLocalServerUrl]);
 
   const disconnect = useCallback(async () => {

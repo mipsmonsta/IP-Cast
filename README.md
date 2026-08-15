@@ -66,6 +66,39 @@ npx expo run:ios
 | `modules/local-media-server/` | iOS native module: GCDWebServer, ImageIO JPEG conversion, AVFoundation video transcoding, video thumbnail generation |
 | `plugins/` | Expo config plugin for GCDWebServer pod and native module linking |
 
+## Testing
+
+```bash
+npm test
+```
+
+39 tests covering core logic: photo grouping (11), cast state store (23), network utilities (5).
+
+| Test file | Coverage |
+|-----------|----------|
+| `__tests__/src/services/photoLibrary.test.ts` | `groupPhotos()` — empty input, year grouping, row chunking, multi-year ordering, ID format |
+| `__tests__/src/store/castStore.test.ts` | Zustand store — initial state, all setters, state transitions, reset, independent updates |
+| `__tests__/src/utils/network.test.ts` | `buildMediaUrl()` — IPv4/IPv6/private range formatting, `getLocalIPAddress()` fallback |
+
+## Bug fixes
+
+### File name mismatch
+- Renamed `CastButton.tsx` → `CastStatusBar.tsx` to match the exported component name. Updated import in `MediaPreviewScreen.tsx`.
+
+### Removed dead stub
+- Removed `getRemoteMediaClient()` from `castService.ts` — it was a stub that always returned `null`. Cleaned up unused `DiscoveryManager` and `SessionManager` imports.
+
+### Pagination race condition
+- Added `isLoadingMoreRef` guard in `usePhotos.ts` to prevent `onEndReached` from triggering duplicate page loads while a fetch is in flight.
+
+### Orphaned temp files on cast failure
+- `useCast.ts`: wrapped server start and `loadMedia` in a try/catch — temp files are cleaned up on failure.
+- `MediaPreviewScreen.tsx`: calls `disconnect()` in the error handler to ensure server shutdown and file cleanup on any cast error.
+
+### Dark mode inconsistency
+- `GalleryScreen`: uses `useColorScheme()` to adapt background (`#fff` / `#000`) and text color based on system appearance.
+- `MediaGrid`: accepts `isDarkMode` prop and adapts year header text (`#333` / `#fff`).
+
 ## Tech stack
 
 - Expo SDK 56 / React Native 0.85.3

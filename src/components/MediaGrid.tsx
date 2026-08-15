@@ -23,6 +23,7 @@ interface MediaGridProps {
   onLoadMore: () => void;
   hasNextPage: boolean;
   loading: boolean;
+  isDarkMode: boolean;
 }
 
 function PhotoTile({
@@ -63,10 +64,10 @@ function PhotoTile({
   );
 }
 
-function YearHeader({ year }: { year: number }) {
+function YearHeader({ year, isDarkMode }: { year: number; isDarkMode: boolean }) {
   return (
     <View style={styles.header}>
-      <Text style={styles.headerText}>{year}</Text>
+      <Text style={[styles.headerText, isDarkMode && styles.headerTextDark]}>{year}</Text>
     </View>
   );
 }
@@ -93,15 +94,16 @@ export function MediaGrid({
   onLoadMore,
   hasNextPage,
   loading,
+  isDarkMode,
 }: MediaGridProps) {
   const renderItem = useCallback(
     ({ item }: { item: GalleryItem }) => {
       if (item.type === 'header') {
-        return <YearHeader year={item.year} />;
+        return <YearHeader year={item.year} isDarkMode={isDarkMode} />;
       }
       return <PhotoRow items={item.items} onSelect={onSelect} />;
     },
-    [onSelect],
+    [onSelect, isDarkMode],
   );
 
   return (
@@ -131,6 +133,9 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: '700',
     color: '#333',
+  },
+  headerTextDark: {
+    color: '#fff',
   },
   row: {
     flexDirection: 'row',

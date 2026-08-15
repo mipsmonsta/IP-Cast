@@ -18,6 +18,7 @@ export function usePhotos(): UsePhotosResult {
   const [endCursor, setEndCursor] = useState<string | undefined>();
   const [hasNextPage, setHasNextPage] = useState(false);
   const isLoadingRef = useRef(false);
+  const isLoadingMoreRef = useRef(false);
 
   const loadPhotos = useCallback(
     async (after?: string, append: boolean = false) => {
@@ -49,8 +50,13 @@ export function usePhotos(): UsePhotosResult {
   );
 
   const loadMore = useCallback(async () => {
-    if (endCursor && hasNextPage && !isLoadingRef.current) {
-      await loadPhotos(endCursor, true);
+    if (endCursor && hasNextPage && !isLoadingRef.current && !isLoadingMoreRef.current) {
+      isLoadingMoreRef.current = true;
+      try {
+        await loadPhotos(endCursor, true);
+      } finally {
+        isLoadingMoreRef.current = false;
+      }
     }
   }, [endCursor, hasNextPage, loadPhotos]);
 

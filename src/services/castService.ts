@@ -1,8 +1,6 @@
 import CastContext, {
   CastState,
   RemoteMediaClient,
-  DiscoveryManager,
-  SessionManager,
 } from 'react-native-google-cast';
 
 /**
@@ -13,15 +11,6 @@ export async function initializeCast(): Promise<CastState | null> {
   // react-native-google-cast auto-initializes via the native module.
   // We just return the current state to verify it's working.
   return CastContext.getCastState();
-}
-
-/**
- * Get the remote media client for the current session, if connected.
- */
-export function getRemoteMediaClient(): RemoteMediaClient | null {
-  const sessionManager = CastContext.getSessionManager();
-  // We need to use async. Use the hook-based approach instead.
-  return null;
 }
 
 /**

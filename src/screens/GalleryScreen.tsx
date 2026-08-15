@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Alert, useColorScheme } from 'react-native';
 import { MediaGrid } from '../components/MediaGrid';
 import { usePhotos } from '../hooks/usePhotos';
 import { useCastStore } from '../store/castStore';
@@ -16,6 +16,7 @@ type GalleryScreenProps = {
 export function GalleryScreen({ navigation }: GalleryScreenProps) {
   const { photos, loading, hasNextPage, loadMore, hasPermission } = usePhotos();
   const { setSelectedMedia } = useCastStore();
+  const isDarkMode = useColorScheme() === 'dark';
 
   const groupedItems = useMemo(() => groupPhotos(photos), [photos]);
 
@@ -52,8 +53,8 @@ export function GalleryScreen({ navigation }: GalleryScreenProps) {
 
   if (hasPermission === false) {
     return (
-      <View style={styles.centered}>
-        <Text style={styles.message}>
+      <View style={[styles.centered, isDarkMode && styles.centeredDark]}>
+        <Text style={[styles.message, isDarkMode && styles.messageDark]}>
           Photo library access is required to browse your media.{'\n'}
           Please grant permission in Settings.
         </Text>
@@ -63,20 +64,21 @@ export function GalleryScreen({ navigation }: GalleryScreenProps) {
 
   if (loading && photos.length === 0) {
     return (
-      <View style={styles.centered}>
+      <View style={[styles.centered, isDarkMode && styles.centeredDark]}>
         <ActivityIndicator size="large" color="#1a73e8" />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, isDarkMode && styles.containerDark]}>
       <MediaGrid
         items={groupedItems}
         onSelect={handleSelect}
         onLoadMore={loadMore}
         hasNextPage={hasNextPage}
         loading={loading}
+        isDarkMode={isDarkMode}
       />
     </View>
   );
@@ -87,16 +89,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  containerDark: {
+    backgroundColor: '#000',
+  },
   centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
   },
+  centeredDark: {
+    backgroundColor: '#000',
+  },
   message: {
     fontSize: 16,
     color: '#666',
     textAlign: 'center',
     lineHeight: 22,
+  },
+  messageDark: {
+    color: '#aaa',
   },
 });

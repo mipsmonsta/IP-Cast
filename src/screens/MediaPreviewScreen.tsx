@@ -13,7 +13,7 @@ import {
 import { VideoView, useVideoPlayer } from 'expo-video';
 import { useRoute } from '@react-navigation/native';
 import { copyAsync, deleteAsync, cacheDirectory } from 'expo-file-system/legacy';
-import { CastStatusBar } from '../components/CastButton';
+import { CastStatusBar } from '../components/CastStatusBar';
 import { useCast } from '../hooks/useCast';
 import { useCastStore } from '../store/castStore';
 import type { MediaItem } from '../services/photoLibrary';
@@ -91,6 +91,7 @@ export function MediaPreviewScreen({ navigation }: MediaPreviewScreenProps) {
       setIsCasting(true);
       await castMedia();
     } catch (error: any) {
+      disconnect().catch(() => {});
       Alert.alert(
         'Cast Error',
         error.message || 'Failed to cast media. Ensure you are connected to a Cast device first.',
